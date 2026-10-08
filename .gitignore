@@ -1,0 +1,5 @@
+node_modules/
+data/share.duckdb
+data/share.duckdb.wal
+data/reporting/
+.DS_Store

@@ -1,0 +1,66 @@
+{% extends "govuk/template.njk" %}
+
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+
+{% block pageTitle %}{{ pageTitle }} - {{ serviceName }} - GOV.UK{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="/govuk/govuk-frontend.min.css">
+{% endblock %}
+
+{% block govukServiceNavigation %}
+  {{ govukServiceNavigation({
+    serviceName: serviceName,
+    serviceUrl: serviceUrl,
+    navigation: [
+      { href: "/cases", text: "Cases", active: currentPath.startsWith("/cases") },
+      { href: "/applications", text: "Applications", active: currentPath.startsWith("/applications") },
+      { href: "/guests", text: "Guests", active: currentPath.startsWith("/guests") },
+      { href: "/sponsors", text: "Sponsors", active: currentPath.startsWith("/sponsors") },
+      { href: "/accommodations", text: "Accommodation", active: currentPath.startsWith("/accommodations") }
+    ]
+  }) }}
+{% endblock %}
+
+{% block beforeContent %}
+  {{ govukPhaseBanner({
+    tag: { text: "Hackathon" },
+    html: 'This is a rebuild of Share for the HFU Hackathon 2026. All data is synthetic.'
+  }) }}
+  {% block breadcrumbs %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+  {% if flash %}
+    {{ govukNotificationBanner({
+      type: flash.type,
+      titleText: flash.title,
+      html: flash.html
+    }) }}
+  {% endif %}
+  {% block main_content %}{% endblock %}
+{% endblock %}
+
+{% block footer %}
+  <footer class="govuk-footer">
+    <div class="govuk-width-container">
+      <div class="govuk-footer__meta">
+        <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+          <span class="govuk-footer__licence-description">
+            Synthetic data only. No real people, no real cases.
+          </span>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" src="/govuk/govuk-frontend.min.js"></script>
+  <script type="module">
+    import { initAll } from '/govuk/govuk-frontend.min.js'
+    initAll()
+  </script>
+{% endblock %}

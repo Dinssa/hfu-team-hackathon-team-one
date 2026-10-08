@@ -1,0 +1,40 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block main_content %}
+  <h1 class="govuk-heading-xl">{{ serviceName }}</h1>
+
+  <p class="govuk-body-l">Casework for guests arriving under the Homes for Ukraine scheme: applications, households, safeguarding checks and arrivals.</p>
+
+  <h2 class="govuk-heading-m">Data files processed</h2>
+
+  {% if files.length %}
+    {% set rows = [] %}
+    {% for f in files %}
+      {% set rows = (rows.push([
+        { text: f.file_name },
+        { text: f.file_type },
+        { text: f.processed_at | date },
+        { text: f.row_count, format: "numeric" },
+        { text: f.created_count, format: "numeric" },
+        { text: f.rejected_count, format: "numeric" }
+      ]), rows) %}
+    {% endfor %}
+    {{ govukTable({
+      caption: "Files ingested so far, in number order",
+      captionClasses: "govuk-table__caption--s",
+      head: [
+        { text: "File" },
+        { text: "Type" },
+        { text: "Processed" },
+        { text: "Rows", format: "numeric" },
+        { text: "Created", format: "numeric" },
+        { text: "Rejected", format: "numeric" }
+      ],
+      rows: rows
+    }) }}
+  {% else %}
+    {{ govukInsetText({ text: "No data files have been processed yet. The first file to arrive is 01-visa-applications.json." }) }}
+  {% endif %}
+{% endblock %}
