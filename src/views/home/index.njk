@@ -52,7 +52,7 @@
       ]), rows) %}
     {% endfor %}
     {{ govukTable({
-      caption: "Files processed so far, in number order",
+      caption: "Files processed so far",
       captionClasses: "govuk-table__caption--s",
       head: [
         { text: "File" },
@@ -66,6 +66,6 @@
       rows: rows
     }) }}
   {% else %}
-    {{ govukInsetText({ text: "No data files have been processed yet. The first file to arrive is 01-visa-applications.json." }) }}
+    {{ govukInsetText({ text: "No data files have been processed yet. Visa applications are processed first, one file at a time." }) }}
   {% endif %}
 {% endblock %}

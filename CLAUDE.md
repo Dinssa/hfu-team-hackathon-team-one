@@ -25,7 +25,7 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 | Footer | `govukFooter` macro in `layout.njk`, with OGL licence and crown |
 | Data | DuckDB file `data/share.duckdb` via `@duckdb/node-api`. Helpers in `src/db.js`: `run`, `all`, `one`, `ensureSchema` |
 | Schema | `src/schema.sql`, idempotent, two schemas: `raw` (files as received) and `serve` (what the app reads) |
-| Ingest | `npm run ingest` processes the next unprocessed file in number order. Also a button on the home page |
+| Ingest | `npm run ingest` processes the next unprocessed file, feed folder by feed folder (`HANDLERS` order in `src/ingest/index.js`), then by name. Also a button on the home page |
 | Inspection | `duckdb data/share.duckdb -readonly` or `-ui`, only while the app is stopped. A running app holds an exclusive lock; nothing else can open the file, not even read-only. Analysts use the Parquet snapshots in `data/reporting/` |
 
 Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`, `npm run snapshot` (Parquet export to `data/reporting/`).
@@ -39,8 +39,9 @@ Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`,
 
 ## Data facts (from DATA.md)
 
-- Applications (JSON, odd files): array of submissions. `submissionGUID`, `application.uniqueApplicationNumber` (UAN), `application.eventDateTime`, `person[]`. Person 1 is the lead applicant. All details are `questions[]` matched on exact `title`.
-- Arrivals (CSV): `WEBVAF` is the GWF. Join GWF first, UAN fallback. Files are cumulative. Same reference may repeat with different decisions.
+- Applications (`data/incoming/visa_applications/*.json`): one `{ record }` per file. `record.id` (submission GUID), `event.application_ref` (UAN), `event.occurred_at`, `people[]`. Lead applicant has role `kind: lead_applicant`; sponsor has role `relationship: sponsor`. All details are `responses[]` matched on exact `section` + `prompt`. The GWF is the `GWF Number` response.
+- Arrivals (`data/incoming/visa_arrivals/*.xlsx`): `VAF_REF` is the GWF. Join GWF first, `UAN` fallback. Files are cumulative. Same reference may repeat with different outcomes. Not ingested yet.
+- Host offers (`eoi/`) and unaccompanied minors (`uam/`) are JSON, one record per file. Not ingested yet.
 - Visa status: Issued or GRANT with arrival datetime = Arrived; without = Issued; Withdrawn; Refused; Voided = Confirmed; never updated = Pending. Precedence on conflict: Arrived > Issued > Withdrawn > Refused > Confirmed.
 - Case = applications sharing sponsor and accommodation address. Council comes from the accommodation.
 - Any guest under 18 on a case means check 3 needs an Enhanced DBS.
@@ -69,5 +70,5 @@ src/schema.sql        tables
 src/ingest/           index.js (next file), applications.js, arrivals.js, status.js
 src/routes/           one router per record type
 src/views/            layout.njk, components/, one folder per record type
-data/incoming/        the 20 hackathon files, copied, never edited
+data/incoming/        one folder per feed (visa_applications, visa_arrivals, eoi, uam), never edited
 ```

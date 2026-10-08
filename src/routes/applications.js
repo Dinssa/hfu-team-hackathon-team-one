@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { all, one } from '../db.js'
 import { VISA_STATUSES } from '../ingest/status.js'
+import { valuesText } from '../ingest/applications.js'
 import { listParam, textParam, selectedFilters, checkboxItems } from '../lib/filters.js'
 
 const router = Router()
@@ -89,15 +90,18 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
     const raw = await one('SELECT payload FROM raw.submissions WHERE submission_guid = $1', [application.submission_guid])
     const submission = raw ? JSON.parse(raw.payload) : null
 
-    // Every answer on the submission, grouped by person, in the order they arrived.
-    const people = (submission?.person ?? []).map(p => ({
-      id: p.id,
-      role: p.role,
-      guest: guests.find(g => g.person_id === p.id) ?? null,
-      answers: (p.questions ?? []).map(q => ({ key: q.title, value: q.answer ?? '' }))
-    }))
-
     const lead = guests.find(g => g.is_lead) ?? guests[0]
+
+    // Every answer on the submission, grouped by person, in the order they arrived.
+    const people = (submission?.people ?? []).map(p => ({
+      title: personTitle(p, lead, application),
+      answers: [...(p.responses ?? [])]
+        .sort((x, y) => x.seq - y.seq)
+        .map(r => ({
+          key: r.prompt && r.prompt !== r.section ? `${r.section}: ${r.prompt}` : r.section,
+          value: valuesText(r.values)
+        }))
+    }))
     res.render('applications/show.njk', {
       pageTitle: `Application ${application.uan ?? application.submission_guid}`,
       application,
@@ -110,5 +114,16 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
     next(err)
   }
 })
+
+function personTitle (person, lead, application) {
+  const roles = person.roles ?? []
+  if (roles.some(r => r.kind === 'lead_applicant')) {
+    return `${lead?.given_name ?? ''} ${lead?.family_name ?? ''} (lead applicant)`.trim()
+  }
+  if (roles.some(r => r.relationship === 'sponsor')) {
+    return `${application.sponsor_given_name ?? ''} ${application.sponsor_family_name ?? ''} (sponsor)`.trim()
+  }
+  return `Person ${person.index}`
+}
 
 export default router

@@ -24,7 +24,8 @@
       {% set navItems = [
         { text: "Application", href: "#application", active: true },
         { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
-        { text: "People (" + guests.length + ")", href: "#people" },
+        { text: "Guests (" + guests.length + ")", href: "#guests" },
+        { text: "Submitted answers", href: "#answers" },
         { text: "Raw submission", href: "#raw-submission" }
       ] %}
       {{ mojSideNavigation({
@@ -52,24 +53,35 @@
         card: { title: { text: "Where the household is going" } },
         rows: [
           { key: { text: "Sponsor" }, value: { text: application.sponsor_given_name + " " + application.sponsor_family_name } },
-          { key: { text: "Accommodation" }, value: { text: (application.accommodation_address or "Not given") + (", " + application.accommodation_postcode if application.accommodation_postcode else "") } },
+          { key: { text: "Accommodation" }, value: { text: (application.accommodation_address or "Not given") + (", " + application.accommodation_postcode if application.accommodation_postcode and application.accommodation_postcode not in application.accommodation_address else "") } },
           { key: { text: "Council" }, value: { text: application.council or "No council named" } },
           { key: { text: "Staying with sponsor" }, value: { text: application.staying_with_sponsor or "Not answered" } },
           { key: { text: "Host" }, value: { text: (application.host_given_name + " " + application.host_family_name) if application.host_given_name else "Same as sponsor" } }
         ]
       }) }}
 
-      <h2 class="govuk-heading-l" id="people">People on this application</h2>
+      <h2 class="govuk-heading-l" id="guests">Guests on this application</h2>
+      {% for g in guests %}
+        {{ govukSummaryList({
+          card: { title: { text: g.given_name + " " + g.family_name } },
+          rows: [
+            { key: { text: "Relationship" }, value: { text: g.relationship or "Not given" } },
+            { key: { text: "Date of birth" }, value: { text: (g.date_of_birth | date("short")) or "Not given" } },
+            { key: { text: "Sex" }, value: { text: g.sex or "Not given" } },
+            { key: { text: "Nationality" }, value: { text: g.nationality or "Not given" } },
+            { key: { text: "Passport number" }, value: { text: g.passport_number or "Not given" } }
+          ]
+        }) }}
+      {% endfor %}
+
+      <h2 class="govuk-heading-l" id="answers">Submitted answers</h2>
       {% for person in people %}
-        {% set g = person.guest %}
         {% set rows = [] %}
         {% for answer in person.answers %}
           {% set rows = (rows.push({ key: { text: answer.key }, value: { text: answer.value or "Not answered" } }), rows) %}
         {% endfor %}
         {{ govukSummaryList({
-          card: {
-            title: { text: (g.given_name + " " + g.family_name if g else "Person " + person.id) + (" (lead applicant)" if person.id == 1 else " (" + person.role | lower + ")") }
-          },
+          card: { title: { text: person.title } },
           rows: rows
         }) }}
       {% endfor %}

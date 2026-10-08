@@ -11,7 +11,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-Process the next data file (they go in number order, `data/incoming/01` to `20`) with the **Process next file** button on the home page, or from the command line while the app is stopped:
+Process the next data file (one feed per folder in `data/incoming/`; only `visa_applications/` is ingested so far) with the **Process next file** button on the home page, or from the command line while the app is stopped:
 
 ```
 npm run ingest
