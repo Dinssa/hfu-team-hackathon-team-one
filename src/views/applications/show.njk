@@ -1,0 +1,86 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "moj/components/side-navigation/macro.njk" import mojSideNavigation %}
+{% from "components/status-tag.njk" import statusTag %}
+
+{% block breadcrumbs %}
+  {{ govukBreadcrumbs({ items: [
+    { text: "Home", href: "/" },
+    { text: "Visa applications", href: "/applications" },
+    { text: "Application " + (application.uan or application.submission_guid) }
+  ] }) }}
+{% endblock %}
+
+{% block main_content %}
+  <span class="govuk-caption-xl">Visa application</span>
+  <h1 class="govuk-heading-xl">{{ lead.given_name }} {{ lead.family_name }}</h1>
+
+  <p class="govuk-body">Visa status: {{ statusTag(application.visa_status) }}</p>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+      {% set navItems = [
+        { text: "Application", href: "#application", active: true },
+        { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
+        { text: "People (" + guests.length + ")", href: "#people" },
+        { text: "Raw submission", href: "#raw-submission" }
+      ] %}
+      {{ mojSideNavigation({
+        label: "Sections of this application",
+        classes: "app-side-navigation",
+        items: navItems
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+      <h2 class="govuk-heading-l" id="application">Application</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "Reference details" } },
+        rows: [
+          { key: { text: "UAN" }, value: { text: application.uan or "Not given" } },
+          { key: { text: "GWF" }, value: { text: application.gwf or "Not given" } },
+          { key: { text: "Submitted" }, value: { text: application.event_datetime | date } },
+          { key: { text: "People on application" }, value: { text: guests.length } },
+          { key: { text: "Source file" }, value: { text: application.source_file } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="sponsor-and-accommodation">Sponsor and accommodation</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "Where the household is going" } },
+        rows: [
+          { key: { text: "Sponsor" }, value: { text: application.sponsor_given_name + " " + application.sponsor_family_name } },
+          { key: { text: "Accommodation" }, value: { text: (application.accommodation_address or "Not given") + (", " + application.accommodation_postcode if application.accommodation_postcode else "") } },
+          { key: { text: "Council" }, value: { text: application.council or "No council named" } },
+          { key: { text: "Staying with sponsor" }, value: { text: application.staying_with_sponsor or "Not answered" } },
+          { key: { text: "Host" }, value: { text: (application.host_given_name + " " + application.host_family_name) if application.host_given_name else "Same as sponsor" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="people">People on this application</h2>
+      {% for person in people %}
+        {% set g = person.guest %}
+        {% set rows = [] %}
+        {% for answer in person.answers %}
+          {% set rows = (rows.push({ key: { text: answer.key }, value: { text: answer.value or "Not answered" } }), rows) %}
+        {% endfor %}
+        {{ govukSummaryList({
+          card: {
+            title: { text: (g.given_name + " " + g.family_name if g else "Person " + person.id) + (" (lead applicant)" if person.id == 1 else " (" + person.role | lower + ")") }
+          },
+          rows: rows
+        }) }}
+      {% endfor %}
+
+      {% if submission %}
+        <h2 class="govuk-heading-l" id="raw-submission">Raw submission</h2>
+        {{ govukDetails({
+          summaryText: "Show the submission exactly as received",
+          html: '<pre class="govuk-body-s" style="white-space: pre-wrap; overflow-wrap: anywhere;">' + (submission | dump(2)) + '</pre>'
+        }) }}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

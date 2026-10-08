@@ -1,0 +1,29 @@
+{#
+  One tag per status, one wording each. Colour is a hint; the word is the meaning.
+  Usage: {{ statusTag("Arrived") }}
+#}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+
+{% macro statusTag(status) %}
+  {% set classes = {
+    "Pending": "govuk-tag--grey",
+    "Issued": "govuk-tag--blue",
+    "Arrived": "govuk-tag--green",
+    "Withdrawn": "govuk-tag--orange",
+    "Refused": "govuk-tag--red",
+    "Confirmed": "govuk-tag--purple",
+
+    "Not Started": "govuk-tag--grey",
+    "In Progress": "govuk-tag--light-blue",
+    "Passed": "govuk-tag--green",
+    "Failed": "govuk-tag--red",
+    "No Longer Required": "govuk-tag--grey",
+
+    "Checks Required": "govuk-tag--grey",
+    "Checks Partially Completed": "govuk-tag--light-blue",
+    "Pre-arrival Checks Complete": "govuk-tag--blue",
+    "Checks Completed": "govuk-tag--green",
+    "Some Checks Failed": "govuk-tag--red"
+  } %}
+  {{ govukTag({ text: status, classes: classes[status] | default("govuk-tag--grey") }) }}
+{% endmacro %}

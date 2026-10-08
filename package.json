@@ -1,7 +1,7 @@
 {
   "name": "hfu-team-hackathon-team-one",
   "version": "0.1.0",
-  "description": "Homes for Ukraine casework service, hackathon rebuild",
+  "description": "Haven: Homes for Ukraine casework, hackathon rebuild",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "@duckdb/node-api": "^1.5.6-r.1",
+    "@ministryofjustice/frontend": "^11.1.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "govuk-frontend": "^6.5.1",

@@ -1,0 +1,27 @@
+/* Service-specific overrides on top of GOV.UK Frontend and MOJ Frontend. */
+
+/* Wider page: GOV.UK defaults to 960px. Casework tables need the room.
+   GOV.UK centres the container with auto margins from 1020px, which assumes
+   a 960px width. Keep 30px gutters until the wider container fits. */
+@media (min-width: 40.0625em) {
+  .govuk-width-container {
+    max-width: 1280px;
+    margin-right: 30px;
+    margin-left: 30px;
+  }
+}
+
+@media (min-width: 1340px) {
+  .govuk-width-container {
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+/* Side navigation on detail pages: stays in view while the sections scroll. */
+@media (min-width: 48.0625em) {
+  .app-side-navigation {
+    position: sticky;
+    top: 20px;
+  }
+}

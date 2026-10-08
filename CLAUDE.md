@@ -1,4 +1,4 @@
-# Team One: Share rebuild (HFU Hackathon 2026)
+# Haven: Team One Share rebuild (HFU Hackathon 2026)
 
 Read fully before writing code. The full brief is in the sibling repo `../hfu-hackathon-2026/` (MILESTONES.md, DATA.md, GLOSSARY.md, milestones/*.md). Read those when a milestone needs them; never build there.
 
@@ -19,17 +19,20 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 |---|---|
 | Runtime | Node 24, ES modules |
 | Web | Express 5, `src/app.js` |
-| Templates | Nunjucks + official `govuk-frontend` macros. Search path: `src/views`, then `node_modules/govuk-frontend/dist` so `{% from "govuk/components/x/macro.njk" import govukX %}` works |
+| Templates | Nunjucks + official `govuk-frontend` macros + `@ministryofjustice/frontend` (MOJ) macros. Search path: `src/views`, `node_modules/govuk-frontend/dist`, `node_modules/@ministryofjustice/frontend`, so `govuk/components/x/macro.njk` and `moj/components/x/macro.njk` both resolve |
+| List pages | MOJ filter panel via `{% call filterLayout({...}) %}` from `components/filter-panel.njk`. Routes build `filters` and `selectedFilters` with helpers in `src/lib/filters.js` |
+| Detail pages | MOJ side navigation (`mojSideNavigation`) in a one-quarter column linking to section ids, content in three-quarters, GOV.UK summary cards per section |
+| Footer | `govukFooter` macro in `layout.njk`, with OGL licence and crown |
 | Data | DuckDB file `data/share.duckdb` via `@duckdb/node-api`. Helpers in `src/db.js`: `run`, `all`, `one`, `ensureSchema` |
 | Schema | `src/schema.sql`, idempotent, two schemas: `raw` (files as received) and `serve` (what the app reads) |
 | Ingest | `npm run ingest` processes the next unprocessed file in number order. Also a button on the home page |
-| Inspection | `duckdb data/share.duckdb -ui` or `duckdb data/share.duckdb -readonly` |
+| Inspection | `duckdb data/share.duckdb -readonly` or `-ui`, only while the app is stopped. A running app holds an exclusive lock; nothing else can open the file, not even read-only. Analysts use the Parquet snapshots in `data/reporting/` |
 
 Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`, `npm run snapshot` (Parquet export to `data/reporting/`).
 
 ## DuckDB rules
 
-- Only the app process writes to `data/share.duckdb`. Anyone else opens read-only or reads the Parquet snapshots.
+- One process at a time owns `data/share.duckdb`. While `npm run dev` is running, `npm run ingest` and the `duckdb` CLI both fail with "Could not set lock". Use the home page button to ingest while the app runs; stop the app to use the CLI. Set `SHARE_DB=/some/path.duckdb` to point a command at a different database file, which is how tests and experiments avoid the lock.
 - No foreign key constraints. UNIQUE only on immutable keys (`submission_guid`, `dedupe_key`, `row_hash`). Never UPDATE a UNIQUE column.
 - Positional parameters: `$1, $2, ...`. Use `all(sql, [params])` and `run(sql, [params])` from `src/db.js`.
 - Idempotency comes from `INSERT ... ON CONFLICT DO NOTHING` on those keys. Re-running any file must leave row counts unchanged.

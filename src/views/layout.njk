@@ -3,11 +3,14 @@
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/footer/macro.njk" import govukFooter %}
 
 {% block pageTitle %}{{ pageTitle }} - {{ serviceName }} - GOV.UK{% endblock %}
 
 {% block head %}
   <link rel="stylesheet" href="/govuk/govuk-frontend.min.css">
+  <link rel="stylesheet" href="/moj/moj-frontend.min.css">
+  <link rel="stylesheet" href="/public/app.css">
 {% endblock %}
 
 {% block govukServiceNavigation %}
@@ -27,7 +30,7 @@
 {% block beforeContent %}
   {{ govukPhaseBanner({
     tag: { text: "Hackathon" },
-    html: 'This is a rebuild of Share for the HFU Hackathon 2026. All data is synthetic.'
+    html: 'This is a hackathon rebuild of Share. All data is synthetic: no real people, no real cases.'
   }) }}
   {% block breadcrumbs %}{% endblock %}
 {% endblock %}
@@ -44,23 +47,37 @@
 {% endblock %}
 
 {% block footer %}
-  <footer class="govuk-footer">
-    <div class="govuk-width-container">
-      <div class="govuk-footer__meta">
-        <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
-          <span class="govuk-footer__licence-description">
-            Synthetic data only. No real people, no real cases.
-          </span>
-        </div>
-      </div>
-    </div>
-  </footer>
+  {{ govukFooter({
+    meta: {
+      visuallyHiddenTitle: "Support links",
+      items: [
+        { href: "/help", text: "Help" },
+        { href: "/cookies", text: "Cookies" },
+        { href: "/accessibility", text: "Accessibility statement" },
+        { href: "/privacy", text: "Privacy" }
+      ]
+    }
+  }) }}
 {% endblock %}
 
 {% block bodyEnd %}
-  <script type="module" src="/govuk/govuk-frontend.min.js"></script>
   <script type="module">
-    import { initAll } from '/govuk/govuk-frontend.min.js'
-    initAll()
+    import { initAll as initGovuk } from '/govuk/govuk-frontend.min.js'
+    import { initAll as initMoj, FilterToggleButton } from '/moj/moj-frontend.min.js'
+    initGovuk()
+    initMoj()
+    // Filter panels collapse behind a button on small screens.
+    const filter = document.querySelector('.moj-filter-layout__filter')
+    if (filter) {
+      new FilterToggleButton(filter, {
+        bigModeMediaQuery: '(min-width: 48.063em)',
+        startHidden: false,
+        toggleButton: { showText: 'Show filter', hideText: 'Hide filter', classes: 'govuk-button--secondary' },
+        toggleButtonContainer: { selector: '.moj-action-bar__filter' },
+        closeButton: { text: 'Close', classes: 'moj-filter__close' },
+        closeButtonContainer: { selector: '.moj-filter__header-action' }
+      })
+    }
   </script>
+  <script src="/public/app.js" defer></script>
 {% endblock %}

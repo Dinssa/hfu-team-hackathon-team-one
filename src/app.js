@@ -5,15 +5,20 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ensureSchema } from './db.js'
 import homeRoutes from './routes/home.js'
+import ingestRoutes from './routes/ingest.js'
+import applicationRoutes from './routes/applications.js'
+import pageRoutes from './routes/pages.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
 const govukDist = path.join(root, 'node_modules', 'govuk-frontend', 'dist')
+const mojDist = path.join(root, 'node_modules', '@ministryofjustice', 'frontend')
 
 const app = express()
 
-// Templates: our views first, then govuk-frontend so "govuk/..." paths resolve.
-const env = nunjucks.configure([path.join(here, 'views'), govukDist], {
+// Templates: our views first, then govuk-frontend and moj-frontend so
+// "govuk/..." and "moj/..." macro paths resolve.
+const env = nunjucks.configure([path.join(here, 'views'), govukDist, mojDist], {
   autoescape: true,
   express: app,
   noCache: process.env.NODE_ENV !== 'production'
@@ -22,13 +27,17 @@ env.addFilter('date', (value, style = 'long') => formatDate(value, style))
 app.set('view engine', 'njk')
 
 // Service-wide template variables. Rename the service in one place.
-app.locals.serviceName = 'Homes for Ukraine casework'
+app.locals.serviceName = 'Haven'
 app.locals.serviceUrl = '/'
 app.locals.assetPath = '/assets'
 
-// GOV.UK static assets: fonts and images at /assets, CSS and JS at /govuk.
+// Static assets. Fonts and images at /assets (GOV.UK first, MOJ icons fall through),
+// GOV.UK CSS and JS at /govuk, MOJ CSS and JS at /moj.
 app.use('/assets', express.static(path.join(govukDist, 'govuk', 'assets')))
+app.use('/assets', express.static(path.join(mojDist, 'moj', 'assets')))
 app.use('/govuk', express.static(path.join(govukDist, 'govuk')))
+app.use('/moj', express.static(path.join(mojDist, 'moj')))
+app.use('/public', express.static(path.join(here, 'public')))
 
 app.use(express.urlencoded({ extended: false }))
 app.use(session({
@@ -46,6 +55,9 @@ app.use((req, res, next) => {
 })
 
 app.use('/', homeRoutes)
+app.use('/', ingestRoutes)
+app.use('/', applicationRoutes)
+app.use('/', pageRoutes)
 
 app.use((req, res) => {
   res.status(404).render('error.njk', { pageTitle: 'Page not found', message: 'If you typed the web address, check it is correct.' })
