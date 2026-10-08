@@ -53,8 +53,8 @@
       {{ govukSummaryList({
         card: { title: { text: "Where the household is going", headingLevel: 3 } },
         rows: [
-          { key: { text: "Sponsor" }, value: { text: application.sponsor_given_name + " " + application.sponsor_family_name } },
-          { key: { text: "Accommodation" }, value: { text: (application.accommodation_address or "Not given") + (", " + application.accommodation_postcode if application.accommodation_postcode and application.accommodation_postcode not in application.accommodation_address else "") } },
+          { key: { text: "Sponsor" }, value: { html: ('<a class="govuk-link" href="/sponsors/' + application.sponsor_id + '">' + (application.sponsor_given_name + " " + application.sponsor_family_name) | e + '</a>') if application.sponsor_id else "Not given" } },
+          { key: { text: "Accommodation" }, value: { html: ('<a class="govuk-link" href="/accommodations/' + application.accommodation_id + '">' + (application.accommodation_address + (", " + application.accommodation_postcode if application.accommodation_postcode and application.accommodation_postcode not in application.accommodation_address else "")) | e + '</a>') if application.accommodation_id else "No accommodation recorded yet" } },
           { key: { text: "Local authority" }, value: { text: application.council or "No local authority named" } },
           { key: { text: "Staying with sponsor" }, value: { text: application.staying_with_sponsor or "Not answered" } },
           { key: { text: "Host" }, value: { text: (application.host_given_name + " " + application.host_family_name) if application.host_given_name else "Same as sponsor" } }
@@ -64,7 +64,7 @@
       <h2 class="govuk-heading-l" id="guests">Guests on this application</h2>
       {% for g in guests %}
         {{ govukSummaryList({
-          card: { title: { text: g.given_name + " " + g.family_name, headingLevel: 3 } },
+          card: { title: { text: g.given_name + " " + g.family_name, headingLevel: 3 }, actions: { items: [{ href: "/guests/" + g.id, text: "View guest", visuallyHiddenText: g.given_name + " " + g.family_name }] } },
           rows: [
             { key: { text: "Relationship" }, value: { text: g.relationship or "Not given" } },
             { key: { text: "Date of birth" }, value: { text: (g.date_of_birth | date("short")) or "Not given" } },

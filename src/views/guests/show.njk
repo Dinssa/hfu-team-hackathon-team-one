@@ -1,0 +1,90 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "components/page-header.njk" import pageHeader %}
+{% from "components/side-navigation.njk" import sideNavigation %}
+{% from "components/record-tables.njk" import guestsTable %}
+
+{% block breadcrumbs %}
+  {{ govukBreadcrumbs({ items: [
+    { text: "Home", href: "/" },
+    { text: "Guests", href: "/guests" },
+    { text: guest.given_name + " " + guest.family_name }
+  ] }) }}
+{% endblock %}
+
+{% block main_content %}
+  {{ pageHeader({
+    caption: "Guest",
+    title: guest.given_name + " " + guest.family_name,
+    statusLabel: "Visa status",
+    status: guest.visa_status
+  }) }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+      {{ sideNavigation({
+        title: "On this page",
+        label: "Sections of this guest record",
+        items: [
+          { text: "Personal details", href: "#details" },
+          { text: "Linked records", href: "#links" },
+          { text: "Household (" + household.length + ")", href: "#household" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+      <h2 class="govuk-heading-l" id="details">Personal details</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "About the guest", headingLevel: 3 } },
+        rows: [
+          { key: { text: "Date of birth" }, value: { text: (guest.date_of_birth | date("short")) or "Not given" } },
+          { key: { text: "Sex" }, value: { text: guest.sex or "Not given" } },
+          { key: { text: "Nationality" }, value: { text: guest.nationality or "Not given" } },
+          { key: { text: "Passport number" }, value: { text: guest.passport_number or "Not given" } },
+          { key: { text: "Role on application" }, value: { text: guest.relationship or ("Lead applicant" if guest.is_lead else "Family member") } },
+          { key: { text: "Arrived in the UK" }, value: { text: (guest.arrived_at | date) if guest.arrived_at else "Not yet arrived" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="links">Linked records</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "Where this guest fits", headingLevel: 3 } },
+        rows: [
+          { key: { text: "Application" }, value: { html: '<a class="govuk-link" href="/applications/' + guest.application_id + '">' + (guest.uan or ("Application " + guest.application_id)) | e + '</a>' } },
+          { key: { text: "Sponsor" }, value: { html: ('<a class="govuk-link" href="/sponsors/' + guest.sponsor_id + '">' + (guest.sponsor_given_name + " " + guest.sponsor_family_name) | e + '</a>') if guest.sponsor_id else "Not given" } },
+          { key: { text: "Accommodation" }, value: { html: ('<a class="govuk-link" href="/accommodations/' + guest.accommodation_id + '">' + (guest.accommodation_address + (", " + guest.accommodation_postcode if guest.accommodation_postcode and guest.accommodation_postcode not in guest.accommodation_address else "")) | e + '</a>') if guest.accommodation_id else "No accommodation recorded yet" } },
+          { key: { text: "Local authority" }, value: { text: guest.council or "No local authority named" } },
+          { key: { text: "Case" }, value: { html: ('<a class="govuk-link" href="/cases/' + guest.case_id + '">Case ' + guest.case_id + '</a>') if guest.case_id else "Not yet formed" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="household">Household</h2>
+      {% if household.length %}
+        <p class="govuk-body">Other people on the same application.</p>
+        <table class="govuk-table">
+          <caption class="govuk-table__caption govuk-table__caption--s">People travelling with {{ guest.given_name }}</caption>
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header">Name</th>
+              <th scope="col" class="govuk-table__header">Relationship</th>
+              <th scope="col" class="govuk-table__header">Date of birth</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for h in household %}
+              <tr class="govuk-table__row">
+                <td class="govuk-table__cell"><a class="govuk-link" href="/guests/{{ h.id }}">{{ h.given_name }} {{ h.family_name }}</a></td>
+                <td class="govuk-table__cell">{{ h.relationship or ("Lead applicant" if h.is_lead else "Family member") }}</td>
+                <td class="govuk-table__cell">{{ (h.date_of_birth | date("short")) or "Not given" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="govuk-body">{{ guest.given_name }} is the only person on this application.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

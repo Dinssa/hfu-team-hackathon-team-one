@@ -40,7 +40,7 @@ router.get(BASE, async (req, res, next) => {
     const applications = await all(
       `SELECT a.id, a.uan, a.gwf, a.visa_status, a.event_datetime,
               g.given_name, g.family_name,
-              s.given_name AS sponsor_given_name, s.family_name AS sponsor_family_name,
+              s.id AS sponsor_id, s.given_name AS sponsor_given_name, s.family_name AS sponsor_family_name,
               acc.council,
               (SELECT count(*)::INTEGER FROM serve.guests x WHERE x.application_id = a.id) AS people
        FROM serve.applications a

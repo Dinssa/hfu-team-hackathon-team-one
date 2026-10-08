@@ -9,6 +9,9 @@ import homeRoutes from './routes/home.js'
 import ingestRoutes from './routes/ingest.js'
 import applicationRoutes from './routes/applications.js'
 import pageRoutes from './routes/pages.js'
+import guestRoutes from './routes/guests.js'
+import sponsorRoutes from './routes/sponsors.js'
+import accommodationRoutes from './routes/accommodations.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
@@ -60,6 +63,9 @@ app.use('/', homeRoutes)
 app.use('/', ingestRoutes)
 app.use('/', applicationRoutes)
 app.use('/', pageRoutes)
+app.use('/', guestRoutes)
+app.use('/', sponsorRoutes)
+app.use('/', accommodationRoutes)
 
 app.use((req, res) => {
   res.status(404).render('error.njk', { pageTitle: 'Page not found', message: 'If you typed the web address, check it is correct.' })

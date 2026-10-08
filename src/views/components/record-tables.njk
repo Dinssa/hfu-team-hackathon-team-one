@@ -1,0 +1,73 @@
+{#
+  Tables of linked records, reused on sponsor, accommodation and case pages.
+    {{ applicationsTable(applications, "Applications sponsored") }}
+    {{ guestsTable(guests, "Guests") }}
+  Each row links to the record. Captions name what the table shows.
+#}
+{% from "components/status-tag.njk" import statusTag %}
+
+{% macro applicationsTable(applications, caption, options = {}) %}
+  {% if applications.length %}
+    <table class="govuk-table">
+      <caption class="govuk-table__caption govuk-table__caption--s">{{ caption }}</caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Lead applicant</th>
+          <th scope="col" class="govuk-table__header">UAN</th>
+          {% if options.showSponsor %}<th scope="col" class="govuk-table__header">Sponsor</th>{% endif %}
+          <th scope="col" class="govuk-table__header">Submitted</th>
+          <th scope="col" class="govuk-table__header govuk-table__header--numeric">People</th>
+          <th scope="col" class="govuk-table__header">Visa status</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for a in applications %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><a class="govuk-link" href="/applications/{{ a.id }}">{{ a.given_name }} {{ a.family_name }}</a></td>
+            <td class="govuk-table__cell app-nowrap">{{ a.uan or "Not given" }}</td>
+            {% if options.showSponsor %}
+              <td class="govuk-table__cell">
+                {% if a.sponsor_id %}<a class="govuk-link" href="/sponsors/{{ a.sponsor_id }}">{{ a.sponsor_given_name }} {{ a.sponsor_family_name }}</a>{% else %}Not given{% endif %}
+              </td>
+            {% endif %}
+            <td class="govuk-table__cell">{{ a.event_datetime | date("short") }}</td>
+            <td class="govuk-table__cell govuk-table__cell--numeric">{{ a.people }}</td>
+            <td class="govuk-table__cell">{{ statusTag(a.visa_status) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="govuk-body">No applications linked.</p>
+  {% endif %}
+{% endmacro %}
+
+{% macro guestsTable(guests, caption) %}
+  {% if guests.length %}
+    <table class="govuk-table">
+      <caption class="govuk-table__caption govuk-table__caption--s">{{ caption }}</caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Name</th>
+          <th scope="col" class="govuk-table__header">Relationship</th>
+          <th scope="col" class="govuk-table__header">Date of birth</th>
+          <th scope="col" class="govuk-table__header">Application</th>
+          <th scope="col" class="govuk-table__header">Visa status</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for g in guests %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><a class="govuk-link" href="/guests/{{ g.id }}">{{ g.given_name }} {{ g.family_name }}</a></td>
+            <td class="govuk-table__cell">{{ g.relationship or "Not given" }}</td>
+            <td class="govuk-table__cell">{{ (g.date_of_birth | date("short")) or "Not given" }}</td>
+            <td class="govuk-table__cell app-nowrap"><a class="govuk-link" href="/applications/{{ g.application_id }}">{{ g.uan or ("Application " + g.application_id) }}</a></td>
+            <td class="govuk-table__cell">{{ statusTag(g.visa_status) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="govuk-body">No guests linked.</p>
+  {% endif %}
+{% endmacro %}

@@ -1,0 +1,68 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "components/page-header.njk" import pageHeader %}
+{% from "components/side-navigation.njk" import sideNavigation %}
+{% from "components/record-tables.njk" import applicationsTable, guestsTable %}
+
+{% block breadcrumbs %}
+  {{ govukBreadcrumbs({ items: [
+    { text: "Home", href: "/" },
+    { text: "Sponsors", href: "/sponsors" },
+    { text: sponsor.given_name + " " + sponsor.family_name }
+  ] }) }}
+{% endblock %}
+
+{% block main_content %}
+  {{ pageHeader({ caption: "Sponsor", title: sponsor.given_name + " " + sponsor.family_name }) }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+      {{ sideNavigation({
+        title: "On this page",
+        label: "Sections of this sponsor record",
+        items: [
+          { text: "Sponsor details", href: "#details" },
+          { text: "Accommodation (" + accommodations.length + ")", href: "#accommodation" },
+          { text: "Applications (" + applications.length + ")", href: "#applications" },
+          { text: "Guests (" + guests.length + ")", href: "#guests" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+      <h2 class="govuk-heading-l" id="details">Sponsor details</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "Contact and address", headingLevel: 3 } },
+        rows: [
+          { key: { text: "Date of birth" }, value: { text: sponsor.date_of_birth or "Not given" } },
+          { key: { text: "Email" }, value: { text: sponsor.email or "Not given" } },
+          { key: { text: "Telephone" }, value: { text: sponsor.telephone or "Not given" } },
+          { key: { text: "Address" }, value: { text: sponsor.address or "Not given" } },
+          { key: { text: "Postcode" }, value: { text: sponsor.postcode or "Not given" } },
+          { key: { text: "Local authority" }, value: { text: sponsor.council or "No local authority named" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="accommodation">Accommodation</h2>
+      {% if accommodations.length %}
+        <ul class="govuk-list">
+          {% for acc in accommodations %}
+            <li>
+              <a class="govuk-link" href="/accommodations/{{ acc.id }}">{{ acc.address }}{% if acc.postcode and acc.postcode not in acc.address %}, {{ acc.postcode }}{% endif %}</a>
+              <span class="govuk-hint govuk-!-display-inline govuk-!-margin-left-2">{{ acc.council or "No local authority" }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="govuk-body">No accommodation linked to this sponsor yet.</p>
+      {% endif %}
+
+      <h2 class="govuk-heading-l" id="applications">Applications</h2>
+      {{ applicationsTable(applications, "Applications naming this sponsor") }}
+
+      <h2 class="govuk-heading-l" id="guests">Guests</h2>
+      {{ guestsTable(guests, "Guests sponsored by " + sponsor.given_name + " " + sponsor.family_name) }}
+    </div>
+  </div>
+{% endblock %}

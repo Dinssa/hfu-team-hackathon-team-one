@@ -1,0 +1,62 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "components/page-header.njk" import pageHeader %}
+{% from "components/side-navigation.njk" import sideNavigation %}
+{% from "components/record-tables.njk" import applicationsTable, guestsTable %}
+
+{% block breadcrumbs %}
+  {{ govukBreadcrumbs({ items: [
+    { text: "Home", href: "/" },
+    { text: "Accommodation", href: "/accommodations" },
+    { text: accommodation.address }
+  ] }) }}
+{% endblock %}
+
+{% block main_content %}
+  {{ pageHeader({ caption: "Accommodation", title: accommodation.address }) }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+      {{ sideNavigation({
+        title: "On this page",
+        label: "Sections of this accommodation record",
+        items: [
+          { text: "Property details", href: "#details" },
+          { text: "Sponsors (" + sponsors.length + ")", href: "#sponsors" },
+          { text: "Applications (" + applications.length + ")", href: "#applications" },
+          { text: "Guests (" + guests.length + ")", href: "#guests" }
+        ]
+      }) }}
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+      <h2 class="govuk-heading-l" id="details">Property details</h2>
+      {{ govukSummaryList({
+        card: { title: { text: "Address", headingLevel: 3 } },
+        rows: [
+          { key: { text: "Address" }, value: { text: accommodation.address or "Not given" } },
+          { key: { text: "Postcode" }, value: { text: accommodation.postcode or "Not given" } },
+          { key: { text: "Local authority" }, value: { text: accommodation.council or "No local authority named" } }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-l" id="sponsors">Sponsors</h2>
+      {% if sponsors.length %}
+        <ul class="govuk-list">
+          {% for s in sponsors %}
+            <li><a class="govuk-link" href="/sponsors/{{ s.id }}">{{ s.given_name }} {{ s.family_name }}</a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="govuk-body">No sponsors linked to this address.</p>
+      {% endif %}
+
+      <h2 class="govuk-heading-l" id="applications">Applications</h2>
+      {{ applicationsTable(applications, "Applications naming this address", { showSponsor: true }) }}
+
+      <h2 class="govuk-heading-l" id="guests">Guests</h2>
+      {{ guestsTable(guests, "Guests heading to this address") }}
+    </div>
+  </div>
+{% endblock %}

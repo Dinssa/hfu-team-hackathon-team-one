@@ -29,7 +29,9 @@
                 <a class="govuk-link" href="/applications/{{ a.id }}">{{ a.given_name }} {{ a.family_name }}</a>
               </td>
               <td class="govuk-table__cell app-nowrap">{{ a.uan or "Not given" }}</td>
-              <td class="govuk-table__cell">{{ a.sponsor_given_name }} {{ a.sponsor_family_name }}</td>
+              <td class="govuk-table__cell">
+                {% if a.sponsor_id %}<a class="govuk-link" href="/sponsors/{{ a.sponsor_id }}">{{ a.sponsor_given_name }} {{ a.sponsor_family_name }}</a>{% else %}Not given{% endif %}
+              </td>
               <td class="govuk-table__cell">{{ a.council or "No local authority" }}</td>
               <td class="govuk-table__cell govuk-table__cell--numeric">{{ a.people }}</td>
               <td class="govuk-table__cell">{{ statusTag(a.visa_status) }}</td>

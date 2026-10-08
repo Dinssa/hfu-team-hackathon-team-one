@@ -1,0 +1,46 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "components/status-tag.njk" import statusTag %}
+{% from "components/filter-panel.njk" import filterLayout %}
+
+{% block main_content %}
+  <h1 class="govuk-heading-xl">Guests</h1>
+
+  {% call filterLayout({ action: "/guests", filters: filters, selectedFilters: selectedFilters }) %}
+    {% if guests.length %}
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">
+          {{ guests.length }} guest{{ "s" if guests.length != 1 }}{{ " matching your filters" if filtered }}
+        </caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Name</th>
+            <th scope="col" class="govuk-table__header">Date of birth</th>
+            <th scope="col" class="govuk-table__header">Relationship</th>
+            <th scope="col" class="govuk-table__header">Sponsor</th>
+            <th scope="col" class="govuk-table__header">Local authority</th>
+            <th scope="col" class="govuk-table__header">Visa status</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for g in guests %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell"><a class="govuk-link" href="/guests/{{ g.id }}">{{ g.given_name }} {{ g.family_name }}</a></td>
+              <td class="govuk-table__cell">{{ (g.date_of_birth | date("short")) or "Not given" }}</td>
+              <td class="govuk-table__cell">{{ g.relationship or "Not given" }}</td>
+              <td class="govuk-table__cell">
+                {% if g.sponsor_id %}<a class="govuk-link" href="/sponsors/{{ g.sponsor_id }}">{{ g.sponsor_given_name }} {{ g.sponsor_family_name }}</a>{% else %}Not given{% endif %}
+              </td>
+              <td class="govuk-table__cell">{{ g.council or "No local authority" }}</td>
+              <td class="govuk-table__cell">{{ statusTag(g.visa_status) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif filtered %}
+      {{ govukInsetText({ html: 'No guests match these filters. <a class="govuk-link" href="/guests">Clear filters</a>.' }) }}
+    {% else %}
+      {{ govukInsetText({ html: 'No guests yet. <a class="govuk-link" href="/">Process the next data file</a> to bring applications in.' }) }}
+    {% endif %}
+  {% endcall %}
+{% endblock %}

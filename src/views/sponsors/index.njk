@@ -1,0 +1,41 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "components/filter-panel.njk" import filterLayout %}
+
+{% block main_content %}
+  <h1 class="govuk-heading-xl">Sponsors</h1>
+
+  {% call filterLayout({ action: "/sponsors", filters: filters, selectedFilters: selectedFilters }) %}
+    {% if sponsors.length %}
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">
+          {{ sponsors.length }} sponsor{{ "s" if sponsors.length != 1 }}{{ " matching your filters" if filtered }}
+        </caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Name</th>
+            <th scope="col" class="govuk-table__header">Postcode</th>
+            <th scope="col" class="govuk-table__header">Local authority</th>
+            <th scope="col" class="govuk-table__header govuk-table__header--numeric">Applications</th>
+            <th scope="col" class="govuk-table__header govuk-table__header--numeric">Guests</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for s in sponsors %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell"><a class="govuk-link" href="/sponsors/{{ s.id }}">{{ s.given_name }} {{ s.family_name }}</a></td>
+              <td class="govuk-table__cell app-nowrap">{{ s.postcode or "Not given" }}</td>
+              <td class="govuk-table__cell">{{ s.council or "No local authority" }}</td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">{{ s.applications }}</td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">{{ s.guests }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif filtered %}
+      {{ govukInsetText({ html: 'No sponsors match these filters. <a class="govuk-link" href="/sponsors">Clear filters</a>.' }) }}
+    {% else %}
+      {{ govukInsetText({ html: 'No sponsors yet. <a class="govuk-link" href="/">Process the next data file</a> to bring applications in.' }) }}
+    {% endif %}
+  {% endcall %}
+{% endblock %}
