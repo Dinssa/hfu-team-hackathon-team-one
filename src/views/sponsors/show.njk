@@ -18,19 +18,21 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-quarter">
+      {% set base = "/sponsors/" + sponsor.id %}
       {{ sideNavigation({
-        title: "On this page",
+        currentPath: currentPath,
         label: "Sections of this sponsor record",
         items: [
-          { text: "Sponsor details", href: "#details" },
-          { text: "Accommodation (" + accommodations.length + ")", href: "#accommodation" },
-          { text: "Applications (" + applications.length + ")", href: "#applications" },
-          { text: "Guests (" + guests.length + ")", href: "#guests" }
+          { text: "Sponsor details", href: base + "/details" },
+          { text: "Accommodation (" + accommodations.length + ")", href: base + "/accommodation" },
+          { text: "Applications (" + applications.length + ")", href: base + "/applications" },
+          { text: "Guests (" + guests.length + ")", href: base + "/guests" }
         ]
       }) }}
     </div>
 
     <div class="govuk-grid-column-three-quarters">
+      {% if section == "details" %}
       <h2 class="govuk-heading-l" id="details">Sponsor details</h2>
       {{ govukSummaryList({
         card: { title: { text: "Contact and address", headingLevel: 3 } },
@@ -43,6 +45,9 @@
           { key: { text: "Local authority" }, value: { text: sponsor.council or "No local authority named" } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "accommodation" %}
 
       <h2 class="govuk-heading-l" id="accommodation">Accommodation</h2>
       {% if accommodations.length %}
@@ -57,12 +62,19 @@
       {% else %}
         <p class="govuk-body">No accommodation linked to this sponsor yet.</p>
       {% endif %}
+      {% endif %}
+
+      {% if section == "applications" %}
 
       <h2 class="govuk-heading-l" id="applications">Applications</h2>
       {{ applicationsTable(applications, "Applications naming this sponsor") }}
+      {% endif %}
+
+      {% if section == "guests" %}
 
       <h2 class="govuk-heading-l" id="guests">Guests</h2>
       {{ guestsTable(guests, "Guests sponsored by " + sponsor.given_name + " " + sponsor.family_name) }}
+      {% endif %}
     </div>
   </div>
 {% endblock %}

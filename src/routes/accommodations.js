@@ -52,9 +52,14 @@ router.get(BASE, async (req, res, next) => {
   }
 })
 
-router.get(`${BASE}/:id`, async (req, res, next) => {
+const SECTIONS = ['details', 'sponsors', 'applications', 'guests']
+
+router.get([`${BASE}/:id`, `${BASE}/:id/:section`], async (req, res, next) => {
   try {
     const id = Number(req.params.id)
+    if (!req.params.section) return res.redirect(`${BASE}/${id}/details`)
+    const section = req.params.section
+    if (!SECTIONS.includes(section)) return next()
     const accommodation = await one('SELECT * FROM serve.accommodations WHERE id = $1', [id])
     if (!accommodation) return next()
 
@@ -82,7 +87,8 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
       [id]
     )
 
-    res.render('accommodations/show.njk', { pageTitle: `Accommodation ${accommodation.id}`, accommodation, sponsors, applications, guests })
+    res.render('accommodations/show.njk', {
+      section, pageTitle: `Accommodation ${accommodation.id}`, accommodation, sponsors, applications, guests })
   } catch (err) {
     next(err)
   }

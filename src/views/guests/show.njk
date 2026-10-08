@@ -23,18 +23,20 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-quarter">
+      {% set base = "/guests/" + guest.id %}
       {{ sideNavigation({
-        title: "On this page",
+        currentPath: currentPath,
         label: "Sections of this guest record",
         items: [
-          { text: "Personal details", href: "#details" },
-          { text: "Linked records", href: "#links" },
-          { text: "Household (" + household.length + ")", href: "#household" }
+          { text: "Personal details", href: base + "/details" },
+          { text: "Linked records", href: base + "/links" },
+          { text: "Household (" + household.length + ")", href: base + "/household" }
         ]
       }) }}
     </div>
 
     <div class="govuk-grid-column-three-quarters">
+      {% if section == "details" %}
       <h2 class="govuk-heading-l" id="details">Personal details</h2>
       {{ govukSummaryList({
         card: { title: { text: "About the guest", headingLevel: 3 } },
@@ -47,6 +49,9 @@
           { key: { text: "Arrived in the UK" }, value: { text: (guest.arrived_at | date) if guest.arrived_at else "Not yet arrived" } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "links" %}
 
       <h2 class="govuk-heading-l" id="links">Linked records</h2>
       {{ govukSummaryList({
@@ -59,6 +64,9 @@
           { key: { text: "Case" }, value: { html: ('<a class="govuk-link" href="/cases/' + guest.case_id + '">Case ' + guest.case_id + '</a>') if guest.case_id else "Not yet formed" } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "household" %}
 
       <h2 class="govuk-heading-l" id="household">Household</h2>
       {% if household.length %}
@@ -84,6 +92,7 @@
         </table>
       {% else %}
         <p class="govuk-body">{{ guest.given_name }} is the only person on this application.</p>
+      {% endif %}
       {% endif %}
     </div>
   </div>

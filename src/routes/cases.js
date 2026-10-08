@@ -74,9 +74,14 @@ router.get(BASE, async (req, res, next) => {
   }
 })
 
-router.get(`${BASE}/:id`, async (req, res, next) => {
+const SECTIONS = ['household', 'sponsor-and-accommodation', 'checks', 'applications', 'history']
+
+router.get([`${BASE}/:id`, `${BASE}/:id/:section`], async (req, res, next) => {
   try {
     const id = Number(req.params.id)
+    if (!req.params.section) return res.redirect(`${BASE}/${id}/household`)
+    const section = req.params.section
+    if (!SECTIONS.includes(section)) return next()
     const kase = await one(
       `SELECT c.*, s.given_name AS sponsor_given_name, s.family_name AS sponsor_family_name, s.email AS sponsor_email,
               s.telephone AS sponsor_telephone, s.postcode AS sponsor_postcode,
@@ -107,6 +112,7 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
     const events = await all('SELECT * FROM serve.case_events WHERE case_id = $1 ORDER BY occurred_at DESC, id DESC', [id])
 
     res.render('cases/show.njk', {
+      section,
       pageTitle: `Case ${kase.id}`,
       kase,
       applications,

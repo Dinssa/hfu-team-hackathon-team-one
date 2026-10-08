@@ -21,20 +21,22 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-quarter">
+      {% set base = "/cases/" + kase.id %}
       {{ sideNavigation({
-        title: "On this page",
+        currentPath: currentPath,
         label: "Sections of this case",
         items: [
-          { text: "Household (" + guests.length + ")", href: "#household" },
-          { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
-          { text: "Safeguarding checks", href: "#checks" },
-          { text: "Applications (" + applications.length + ")", href: "#applications" },
-          { text: "History", href: "#history" }
+          { text: "Household (" + guests.length + ")", href: base + "/household" },
+          { text: "Sponsor and accommodation", href: base + "/sponsor-and-accommodation" },
+          { text: "Safeguarding checks", href: base + "/checks" },
+          { text: "Applications (" + applications.length + ")", href: base + "/applications" },
+          { text: "History", href: base + "/history" }
         ]
       }) }}
     </div>
 
     <div class="govuk-grid-column-three-quarters">
+      {% if section == "household" %}
       <h2 class="govuk-heading-l" id="household">Household</h2>
       {% if youngest and youngest.age < 18 %}
         {{ govukWarningText({
@@ -67,6 +69,9 @@
           {% endfor %}
         </tbody>
       </table>
+      {% endif %}
+
+      {% if section == "sponsor-and-accommodation" %}
 
       <h2 class="govuk-heading-l" id="sponsor-and-accommodation">Sponsor and accommodation</h2>
       {{ govukSummaryList({
@@ -79,6 +84,9 @@
           { key: { text: "Case opened" }, value: { text: kase.created_at | date } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "checks" %}
 
       <h2 class="govuk-heading-l" id="checks">Safeguarding checks</h2>
       <table class="govuk-table">
@@ -100,9 +108,15 @@
           {% endfor %}
         </tbody>
       </table>
+      {% endif %}
+
+      {% if section == "applications" %}
 
       <h2 class="govuk-heading-l" id="applications">Applications</h2>
       {{ applicationsTable(applications, "Applications grouped into this case") }}
+      {% endif %}
+
+      {% if section == "history" %}
 
       <h2 class="govuk-heading-l" id="history">History</h2>
       {% set items = [] %}
@@ -117,6 +131,7 @@
         {{ mojTimeline({ items: items, headingLevel: 3 }) }}
       {% else %}
         <p class="govuk-body">Nothing has happened on this case yet.</p>
+      {% endif %}
       {% endif %}
     </div>
   </div>

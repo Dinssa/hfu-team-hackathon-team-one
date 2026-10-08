@@ -1,31 +1,32 @@
 {#
-  In-page contents for detail pages. Wraps MOJ side navigation with a heading
-  and the app-side-navigation styles (blue rule, sticky, scroll tracking).
+  Section navigation for detail pages. Each item is a sub-page URL; the one
+  matching the current path is active. Works like tabs, laid out as MOJ side
+  navigation. Anchor links (#id) still work and are tracked on scroll.
   Usage:
     {{ sideNavigation({
-      title: "On this page",
-      label: "Sections of this application",
-      items: [{ text: "Application", href: "#application" }, ...]
+      label: "Sections of this case",
+      items: [{ text: "Household", href: "/cases/1" }, { text: "Checks", href: "/cases/1/checks" }],
+      currentPath: currentPath
     }) }}
-  The first item is marked active unless an item sets active itself.
+  Pass currentPath: macros cannot see template context.
 #}
 {% from "moj/components/side-navigation/macro.njk" import mojSideNavigation %}
 
 {% macro sideNavigation(params) %}
   {% set hasActive = false %}
-  {% for item in params.items %}{% if item.active %}{% set hasActive = true %}{% endif %}{% endfor %}
+  {% for item in params.items %}{% if item.active or item.href == params.currentPath %}{% set hasActive = true %}{% endif %}{% endfor %}
   {% set items = [] %}
   {% for item in params.items %}
     {% set items = (items.push({
       text: item.text,
       href: item.href,
-      active: item.active or (not hasActive and loop.first)
+      active: item.active or item.href == params.currentPath or (not hasActive and loop.first)
     }), items) %}
   {% endfor %}
   <div class="app-side-navigation">
-    <h2 class="govuk-heading-s app-side-navigation__title">{{ params.title or "On this page" }}</h2>
+    {% if params.title %}<h2 class="govuk-heading-s app-side-navigation__title">{{ params.title }}</h2>{% endif %}
     {{ mojSideNavigation({
-      label: params.label or params.title or "On this page",
+      label: params.label or "Sections",
       items: items
     }) }}
   </div>
