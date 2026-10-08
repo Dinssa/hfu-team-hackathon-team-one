@@ -67,9 +67,14 @@ router.get(BASE, async (req, res, next) => {
   }
 })
 
-router.get(`${BASE}/:id`, async (req, res, next) => {
+const SECTIONS = ['details', 'links', 'household']
+
+router.get([`${BASE}/:id`, `${BASE}/:id/:section`], async (req, res, next) => {
   try {
     const id = Number(req.params.id)
+    if (!req.params.section) return res.redirect(`${BASE}/${id}/details`)
+    const section = req.params.section
+    if (!SECTIONS.includes(section)) return next()
     const guest = await one(
       `SELECT g.*, a.uan, a.gwf, a.visa_status, a.event_datetime, a.case_id,
               s.id AS sponsor_id, s.given_name AS sponsor_given_name, s.family_name AS sponsor_family_name,
@@ -90,7 +95,8 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
       [guest.application_id, id]
     )
 
-    res.render('guests/show.njk', { pageTitle: `Guest ${guest.uan ?? guest.id}`, guest, household })
+    res.render('guests/show.njk', {
+      section, pageTitle: `Guest ${guest.uan ?? guest.id}`, guest, household })
   } catch (err) {
     next(err)
   }

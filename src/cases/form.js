@@ -37,7 +37,7 @@ export async function formCases () {
 }
 
 async function findOrCreateCase (app) {
-  // No accommodation yet (guest not staying with the sponsor): one case per sponsor without an address.
+  // No accommodation yet (guest not staying with the sponsor): accommodation_id 0, one case per sponsor without an address.
   const key = `${app.sponsor_id ?? 0}|${app.accommodation_id ?? 0}`
   const existing = await one('SELECT id FROM serve.cases WHERE dedupe_key = $1', [key])
   if (existing) return existing.id
@@ -51,7 +51,7 @@ async function findOrCreateCase (app) {
     `INSERT INTO serve.cases (dedupe_key, sponsor_id, accommodation_id, council, title, created_at)
      VALUES ($1, $2, $3, nullif($4, ''), $5, current_timestamp)
      RETURNING id`,
-    [key, app.sponsor_id ?? 0, app.accommodation_id, council ?? '', title]
+    [key, app.sponsor_id ?? 0, app.accommodation_id ?? 0, council ?? '', title]
   )
   for (const { kind } of CHECK_KINDS) {
     await run('INSERT INTO serve.checks (case_id, kind) VALUES ($1, $2)', [created.id, kind])

@@ -23,20 +23,22 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-quarter">
+      {% set base = "/applications/" + application.id %}
       {{ sideNavigation({
-        title: "On this page",
+        currentPath: currentPath,
         label: "Sections of this application",
         items: [
-          { text: "Application", href: "#application" },
-          { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
-          { text: "Guests (" + guests.length + ")", href: "#guests" },
-          { text: "Submitted answers", href: "#answers" },
-          { text: "Raw submission", href: "#raw-submission" }
+          { text: "Application", href: base + "/application" },
+          { text: "Sponsor and accommodation", href: base + "/sponsor-and-accommodation" },
+          { text: "Guests (" + guests.length + ")", href: base + "/guests" },
+          { text: "Submitted answers", href: base + "/answers" },
+          { text: "Raw submission", href: base + "/raw-submission" }
         ]
       }) }}
     </div>
 
     <div class="govuk-grid-column-three-quarters">
+      {% if section == "application" %}
       <h2 class="govuk-heading-l" id="application">Application</h2>
       {{ govukSummaryList({
         card: { title: { text: "Reference details", headingLevel: 3 } },
@@ -49,6 +51,9 @@
           { key: { text: "Source file" }, value: { text: application.source_file } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "sponsor-and-accommodation" %}
 
       <h2 class="govuk-heading-l" id="sponsor-and-accommodation">Sponsor and accommodation</h2>
       {{ govukSummaryList({
@@ -61,6 +66,9 @@
           { key: { text: "Host" }, value: { text: (application.host_given_name + " " + application.host_family_name) if application.host_given_name else "Same as sponsor" } }
         ]
       }) }}
+      {% endif %}
+
+      {% if section == "guests" %}
 
       <h2 class="govuk-heading-l" id="guests">Guests on this application</h2>
       {% for g in guests %}
@@ -75,6 +83,9 @@
           ]
         }) }}
       {% endfor %}
+      {% endif %}
+
+      {% if section == "answers" %}
 
       <h2 class="govuk-heading-l" id="answers">Submitted answers</h2>
       {% for person in people %}
@@ -87,6 +98,9 @@
           rows: rows
         }) }}
       {% endfor %}
+      {% endif %}
+
+      {% if section == "raw-submission" %}
 
       {% if submission %}
         <h2 class="govuk-heading-l" id="raw-submission">Raw submission</h2>
@@ -94,6 +108,7 @@
           summaryText: "Show the submission exactly as received",
           html: '<pre class="govuk-body-s app-pre">' + (submission | dump(2)) + '</pre>'
         }) }}
+      {% endif %}
       {% endif %}
     </div>
   </div>

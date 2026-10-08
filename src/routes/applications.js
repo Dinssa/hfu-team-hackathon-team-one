@@ -72,9 +72,14 @@ router.get(BASE, async (req, res, next) => {
   }
 })
 
-router.get(`${BASE}/:id`, async (req, res, next) => {
+const SECTIONS = ['application', 'sponsor-and-accommodation', 'guests', 'answers', 'raw-submission']
+
+router.get([`${BASE}/:id`, `${BASE}/:id/:section`], async (req, res, next) => {
   try {
     const id = Number(req.params.id)
+    if (!req.params.section) return res.redirect(`${BASE}/${id}/application`)
+    const section = req.params.section
+    if (!SECTIONS.includes(section)) return next()
     const application = await one(
       `SELECT a.*, s.given_name AS sponsor_given_name, s.family_name AS sponsor_family_name,
               acc.address AS accommodation_address, acc.postcode AS accommodation_postcode, acc.council
@@ -103,6 +108,7 @@ router.get(`${BASE}/:id`, async (req, res, next) => {
         }))
     }))
     res.render('applications/show.njk', {
+      section,
       pageTitle: `Application ${application.uan ?? application.submission_guid}`,
       application,
       lead,
