@@ -25,7 +25,7 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 | Footer | `govukFooter` macro in `layout.njk`, with OGL licence and crown |
 | Data | DuckDB file `data/share.duckdb` via `@duckdb/node-api`. Helpers in `src/db.js`: `run`, `all`, `one`, `ensureSchema` |
 | Schema | `src/schema.sql`, idempotent, two schemas: `raw` (files as received) and `serve` (what the app reads) |
-| Ingest | `npm run ingest` processes the next unprocessed file, feed folder by feed folder (`HANDLERS` order in `src/ingest/index.js`), then by name. Also a button on the home page |
+| Ingest | Automatic: the running app processes every pending file on start and whenever a file lands in a handled feed folder (`src/ingest/watch.js`, in-process `fs.watch`, not a separate worker). Order is feed folder (`HANDLERS` in `src/ingest/index.js`), then name. All ingests queue through one lock because the app shares a single DuckDB connection. `npm run ingest` processes everything pending while the app is stopped; the home page button processes one file. `SHARE_INCOMING=/some/dir` points at a different incoming folder |
 | Inspection | `duckdb data/share.duckdb -readonly` or `-ui`, only while the app is stopped. A running app holds an exclusive lock; nothing else can open the file, not even read-only. Analysts use the Parquet snapshots in `data/reporting/` |
 
 Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`, `npm run snapshot` (Parquet export to `data/reporting/`).

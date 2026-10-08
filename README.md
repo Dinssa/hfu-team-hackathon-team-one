@@ -11,7 +11,9 @@ npm run dev
 
 Open http://localhost:3000.
 
-Process the next data file (one feed per folder in `data/incoming/`; only `visa_applications/` is ingested so far) with the **Process next file** button on the home page, or from the command line while the app is stopped:
+Data files are processed automatically. While the app is running, every file in `data/incoming/visa_applications/` is ingested on start, and any new file dropped in is ingested within about a second. Only `visa_applications/` is ingested so far; the other feed folders are ignored until their milestones land.
+
+To process pending files with the app stopped:
 
 ```
 npm run ingest

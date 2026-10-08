@@ -1,7 +1,8 @@
-// "Process next file": finds the next file in data/incoming that has not been
-// ingested yet and applies it. Each feed lives in its own folder; folders are
-// processed in HANDLERS order, files within a folder in name order. Run as
-// `npm run ingest`, or from the button on the home page.
+// Ingests files from data/incoming that have not been processed yet. Each feed
+// lives in its own folder; folders are processed in HANDLERS order, files within
+// a folder in name order. The running app processes everything pending on start
+// and whenever a file lands (src/ingest/watch.js). `npm run ingest` does the same
+// once, while the app is stopped. The home page button processes one file.
 import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,10 +10,10 @@ import { all, ensureSchema } from '../db.js'
 import { ingestApplicationsFile } from './applications.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-export const INCOMING_DIR = path.join(here, '..', '..', 'data', 'incoming')
+export const INCOMING_DIR = process.env.SHARE_INCOMING ?? path.join(here, '..', '..', 'data', 'incoming')
 
 // Folders without a handler (visa_arrivals, uam, eoi) are left alone until their milestone lands.
-const HANDLERS = [
+export const HANDLERS = [
   { folder: 'visa_applications', extension: '.json', type: 'applications', handler: ingestApplicationsFile }
 ]
 
@@ -35,13 +36,44 @@ export async function ingestState () {
   return { files, done, next: remaining[0] ?? null, remaining: remaining.length }
 }
 
-export async function ingestNextFile () {
-  const { next } = await ingestState()
-  if (!next) return { fileName: null, summary: null, message: 'Every file in data/incoming has been processed.' }
-  return ingestFile(next)
+// The app shares one DuckDB connection, so ingests must never overlap: the
+// watcher, the home page button and startup all queue through here.
+let queue = Promise.resolve()
+function exclusive (fn) {
+  const result = queue.then(fn)
+  queue = result.catch(() => {})
+  return result
 }
 
-export async function ingestFile (fileName) {
+export function ingestNextFile () {
+  return exclusive(async () => {
+    const { next } = await ingestState()
+    if (!next) return { fileName: null, summary: null, message: 'Every file in data/incoming has been processed.' }
+    return ingestOne(next)
+  })
+}
+
+export function ingestFile (fileName) {
+  return exclusive(() => ingestOne(fileName))
+}
+
+// A file that fails (for example, JSON still being written) stays pending and is retried on the next run.
+export function ingestPending () {
+  return exclusive(async () => {
+    const { files, done } = await ingestState()
+    const results = []
+    for (const fileName of files.filter(f => !done.has(f))) {
+      try {
+        results.push(await ingestOne(fileName))
+      } catch (err) {
+        results.push({ fileName, error: err, message: `${fileName}: ${err.message}` })
+      }
+    }
+    return results
+  })
+}
+
+async function ingestOne (fileName) {
   const entry = HANDLERS.find(h => fileName.startsWith(`${h.folder}/`) && fileName.endsWith(h.extension))
   if (!entry) {
     throw new Error(`${fileName}: this file type is not supported yet. Build the milestone that ingests it first.`)
@@ -51,13 +83,15 @@ export async function ingestFile (fileName) {
   return { fileName, type: entry.type, summary, message }
 }
 
-// CLI entry: `node src/ingest/index.js` or `node src/ingest/index.js visa_applications/application_1a2b.json`
+// CLI entry: `node src/ingest/index.js` (everything pending) or `node src/ingest/index.js visa_applications/application_1a2b.json`
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   await ensureSchema()
   const requested = process.argv[2]
   try {
-    const result = requested ? await ingestFile(requested) : await ingestNextFile()
-    console.log(result.message)
+    const results = requested ? [await ingestFile(requested)] : await ingestPending()
+    if (results.length === 0) console.log('Every file in data/incoming has been processed.')
+    for (const r of results) (r.error ? console.error : console.log)(r.message)
+    if (results.some(r => r.error)) process.exitCode = 1
   } catch (err) {
     console.error(err.message)
     process.exitCode = 1

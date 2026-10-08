@@ -4,6 +4,7 @@ import session from 'express-session'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ensureSchema } from './db.js'
+import { watchIncoming } from './ingest/watch.js'
 import homeRoutes from './routes/home.js'
 import ingestRoutes from './routes/ingest.js'
 import applicationRoutes from './routes/applications.js'
@@ -80,4 +81,5 @@ function formatDate (value, style) {
 
 const port = process.env.PORT ?? 3000
 await ensureSchema()
+await watchIncoming()
 app.listen(port, () => console.log(`Share rebuild listening on http://localhost:${port}`))
