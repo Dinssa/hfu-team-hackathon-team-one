@@ -8,7 +8,8 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 - Never run `git commit`, `git push` or `git add`. Draft commit messages as text.
 - Never look at or search for the real Share codebase. Build from the brief only. Do not invoke any `hfu-*` skills in this repo.
 - No real authentication. Roles are a "sign in as" picker (M6).
-- No Docker, no background workers, no build step.
+- No Docker, no build step.
+- Background workers are allowed (file watchers, timers, queues). Any worker that writes to `data/share.duckdb` must run inside the app process, because a separate process cannot open the database while the app holds its lock.
 - When a milestone's acceptance criteria all pass, stop and report. Do not gold-plate.
 - Do not run linters, formatters or test suites unprompted. Ask first.
 - Never invent records. Everything comes from `data/incoming/`. Unmatched rows go to `raw.rejected_rows`, never crash.
@@ -25,7 +26,7 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 | Footer | `govukFooter` macro in `layout.njk`, with OGL licence and crown |
 | Data | DuckDB file `data/share.duckdb` via `@duckdb/node-api`. Helpers in `src/db.js`: `run`, `all`, `one`, `ensureSchema` |
 | Schema | `src/schema.sql`, idempotent, two schemas: `raw` (files as received) and `serve` (what the app reads) |
-| Ingest | Automatic: the running app processes every pending file on start and whenever a file lands in a handled feed folder (`src/ingest/watch.js`, in-process `fs.watch`, not a separate worker). Order is feed folder (`HANDLERS` in `src/ingest/index.js`), then name. All ingests queue through one lock because the app shares a single DuckDB connection. `npm run ingest` processes everything pending while the app is stopped; the home page button processes one file. `SHARE_INCOMING=/some/dir` points at a different incoming folder |
+| Ingest | Automatic: the running app processes every pending file on start and whenever a file lands in a handled feed folder (`src/ingest/watch.js`, an in-process `fs.watch` background worker). Order is feed folder (`HANDLERS` in `src/ingest/index.js`), then name. All ingests queue through one lock because the app shares a single DuckDB connection. `npm run ingest` processes everything pending while the app is stopped; the home page button processes one file. `SHARE_INCOMING=/some/dir` points at a different incoming folder |
 | Inspection | `duckdb data/share.duckdb -readonly` or `-ui`, only while the app is stopped. A running app holds an exclusive lock; nothing else can open the file, not even read-only. Analysts use the Parquet snapshots in `data/reporting/` |
 
 Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`, `npm run snapshot` (Parquet export to `data/reporting/`).
