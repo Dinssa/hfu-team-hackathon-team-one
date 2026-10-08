@@ -58,12 +58,12 @@ router.get(BASE, async (req, res, next) => {
       filters: [
         { type: 'text', name: 'q', label: 'Name or reference', hint: 'Applicant, sponsor, UAN or GWF', value: q },
         { type: 'checkboxes', name: 'status', legend: 'Visa status', items: checkboxItems(VISA_STATUSES, status) },
-        { type: 'select', name: 'council', label: 'Council', value: council, options: councils, emptyText: 'All councils' }
+        { type: 'select', name: 'council', label: 'Local authority', value: council, options: councils, emptyText: 'All local authorities', autocomplete: true }
       ],
       selectedFilters: selectedFilters(BASE, current, [
         { name: 'q', heading: 'Name or reference' },
         { name: 'status', heading: 'Visa status' },
-        { name: 'council', heading: 'Council' }
+        { name: 'council', heading: 'Local authority' }
       ]),
       filtered: where.length > 0
     })

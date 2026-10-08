@@ -1,0 +1,18 @@
+{#
+  Row of linked counts, for landing pages.
+  Usage:
+    {{ statTiles([{ count: 8, label: "Applications", href: "/applications" }, ...]) }}
+  The whole tile is one link: number and label share the link colour, underline and focus style.
+#}
+{% macro statTiles(tiles) %}
+  <ul class="app-stat-tiles">
+    {% for tile in tiles %}
+      <li class="app-stat-tile">
+        <a class="govuk-link govuk-link--no-visited-state app-stat-tile__link" href="{{ tile.href }}">
+          <span class="app-stat-tile__count">{{ tile.count }}</span>
+          <span class="app-stat-tile__label">{{ tile.label }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}

@@ -1,4 +1,27 @@
-// Haven page scripts. Loaded after GOV.UK and MOJ Frontend have initialised.
+// Haven page scripts. Runs after GOV.UK Frontend, MOJ Frontend and
+// accessible-autocomplete have loaded (this file is deferred).
+
+// Selects marked data-module="app-autocomplete" become a type-ahead that keeps
+// the original select for form submission. Label and id carry across.
+function enhanceAutocompletes () {
+  if (typeof window.accessibleAutocomplete === 'undefined') return
+  const selects = document.querySelectorAll('select[data-module="app-autocomplete"]')
+  for (const select of selects) {
+    const selected = select.options[select.selectedIndex]
+    window.accessibleAutocomplete.enhanceSelectElement({
+      selectElement: select,
+      defaultValue: selected && selected.value ? selected.text : '',
+      placeholder: select.dataset.placeholder || 'Start typing or select one',
+      autoselect: false,
+      showAllValues: true,
+      confirmOnBlur: false,
+      preserveNullOptions: true,
+      displayMenu: 'overlay',
+      dropdownArrow: ({ className }) =>
+        `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`
+    })
+  }
+}
 
 // Side navigation built from in-page anchors: highlight the section in view.
 function trackSideNavigation () {
@@ -36,4 +59,5 @@ function trackSideNavigation () {
   }
 }
 
+enhanceAutocompletes()
 trackSideNavigation()

@@ -8,7 +8,8 @@
   `filters` is a list of controls:
     { type: "text", name, label, value, hint? }
     { type: "checkboxes", name, legend, items: [{ value, text, checked }] }
-    { type: "select", name, label, value, options: ["A", "B"], emptyText?: "All councils" }
+    { type: "select", name, label, value, options: ["A", "B"], emptyText?: "All local authorities", autocomplete?: true }
+    (autocomplete: true turns a long select into a type-ahead; leave it off for short lists)
 #}
 {% from "moj/components/filter/macro.njk" import mojFilter %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
@@ -35,7 +36,8 @@
           id: "filter-" + f.name,
           name: f.name,
           label: { text: f.label, classes: "govuk-label--s" },
-          items: items
+          items: items,
+          attributes: { "data-module": "app-autocomplete", "data-placeholder": f.placeholder or "Start typing or select one" } if f.autocomplete else {}
         }) }}
       {% elif f.type == "checkboxes" %}
         {{ govukCheckboxes({

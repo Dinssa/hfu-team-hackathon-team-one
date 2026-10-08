@@ -2,8 +2,8 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
-{% from "moj/components/side-navigation/macro.njk" import mojSideNavigation %}
-{% from "components/status-tag.njk" import statusTag %}
+{% from "components/page-header.njk" import pageHeader %}
+{% from "components/side-navigation.njk" import sideNavigation %}
 
 {% block breadcrumbs %}
   {{ govukBreadcrumbs({ items: [
@@ -14,31 +14,32 @@
 {% endblock %}
 
 {% block main_content %}
-  <span class="govuk-caption-xl">Visa application</span>
-  <h1 class="govuk-heading-xl">{{ lead.given_name }} {{ lead.family_name }}</h1>
-
-  <p class="govuk-body">Visa status: {{ statusTag(application.visa_status) }}</p>
+  {{ pageHeader({
+    caption: "Visa application",
+    title: lead.given_name + " " + lead.family_name,
+    statusLabel: "Visa status",
+    status: application.visa_status
+  }) }}
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-quarter">
-      {% set navItems = [
-        { text: "Application", href: "#application", active: true },
-        { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
-        { text: "Guests (" + guests.length + ")", href: "#guests" },
-        { text: "Submitted answers", href: "#answers" },
-        { text: "Raw submission", href: "#raw-submission" }
-      ] %}
-      {{ mojSideNavigation({
+      {{ sideNavigation({
+        title: "On this page",
         label: "Sections of this application",
-        classes: "app-side-navigation",
-        items: navItems
+        items: [
+          { text: "Application", href: "#application" },
+          { text: "Sponsor and accommodation", href: "#sponsor-and-accommodation" },
+          { text: "Guests (" + guests.length + ")", href: "#guests" },
+          { text: "Submitted answers", href: "#answers" },
+          { text: "Raw submission", href: "#raw-submission" }
+        ]
       }) }}
     </div>
 
     <div class="govuk-grid-column-three-quarters">
       <h2 class="govuk-heading-l" id="application">Application</h2>
       {{ govukSummaryList({
-        card: { title: { text: "Reference details" } },
+        card: { title: { text: "Reference details", headingLevel: 3 } },
         rows: [
           { key: { text: "UAN" }, value: { text: application.uan or "Not given" } },
           { key: { text: "GWF" }, value: { text: application.gwf or "Not given" } },
@@ -50,11 +51,11 @@
 
       <h2 class="govuk-heading-l" id="sponsor-and-accommodation">Sponsor and accommodation</h2>
       {{ govukSummaryList({
-        card: { title: { text: "Where the household is going" } },
+        card: { title: { text: "Where the household is going", headingLevel: 3 } },
         rows: [
           { key: { text: "Sponsor" }, value: { text: application.sponsor_given_name + " " + application.sponsor_family_name } },
           { key: { text: "Accommodation" }, value: { text: (application.accommodation_address or "Not given") + (", " + application.accommodation_postcode if application.accommodation_postcode and application.accommodation_postcode not in application.accommodation_address else "") } },
-          { key: { text: "Council" }, value: { text: application.council or "No council named" } },
+          { key: { text: "Local authority" }, value: { text: application.council or "No local authority named" } },
           { key: { text: "Staying with sponsor" }, value: { text: application.staying_with_sponsor or "Not answered" } },
           { key: { text: "Host" }, value: { text: (application.host_given_name + " " + application.host_family_name) if application.host_given_name else "Same as sponsor" } }
         ]
@@ -63,7 +64,7 @@
       <h2 class="govuk-heading-l" id="guests">Guests on this application</h2>
       {% for g in guests %}
         {{ govukSummaryList({
-          card: { title: { text: g.given_name + " " + g.family_name } },
+          card: { title: { text: g.given_name + " " + g.family_name, headingLevel: 3 } },
           rows: [
             { key: { text: "Relationship" }, value: { text: g.relationship or "Not given" } },
             { key: { text: "Date of birth" }, value: { text: (g.date_of_birth | date("short")) or "Not given" } },
@@ -81,7 +82,7 @@
           {% set rows = (rows.push({ key: { text: answer.key }, value: { text: answer.value or "Not answered" } }), rows) %}
         {% endfor %}
         {{ govukSummaryList({
-          card: { title: { text: person.title } },
+          card: { title: { text: person.title, headingLevel: 3 } },
           rows: rows
         }) }}
       {% endfor %}
@@ -90,7 +91,7 @@
         <h2 class="govuk-heading-l" id="raw-submission">Raw submission</h2>
         {{ govukDetails({
           summaryText: "Show the submission exactly as received",
-          html: '<pre class="govuk-body-s" style="white-space: pre-wrap; overflow-wrap: anywhere;">' + (submission | dump(2)) + '</pre>'
+          html: '<pre class="govuk-body-s app-pre">' + (submission | dump(2)) + '</pre>'
         }) }}
       {% endif %}
     </div>

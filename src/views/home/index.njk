@@ -2,32 +2,21 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "components/stat-tiles.njk" import statTiles %}
 
 {% block main_content %}
   <h1 class="govuk-heading-xl">{{ serviceName }}</h1>
 
   <p class="govuk-body-l">Casework for guests arriving under the Homes for Ukraine scheme: applications, households, safeguarding checks and arrivals.</p>
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-quarter">
-      <p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link" href="/applications">Applications</a></p>
-      <p class="govuk-heading-l govuk-!-margin-bottom-0">{{ counts.applications }}</p>
-    </div>
-    <div class="govuk-grid-column-one-quarter">
-      <p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link" href="/guests">Guests</a></p>
-      <p class="govuk-heading-l govuk-!-margin-bottom-0">{{ counts.guests }}</p>
-    </div>
-    <div class="govuk-grid-column-one-quarter">
-      <p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link" href="/sponsors">Sponsors</a></p>
-      <p class="govuk-heading-l govuk-!-margin-bottom-0">{{ counts.sponsors }}</p>
-    </div>
-    <div class="govuk-grid-column-one-quarter">
-      <p class="govuk-body govuk-!-margin-bottom-1"><a class="govuk-link" href="/accommodations">Accommodation</a></p>
-      <p class="govuk-heading-l govuk-!-margin-bottom-0">{{ counts.accommodations }}</p>
-    </div>
-  </div>
+  {{ statTiles([
+    { count: counts.applications, label: "Applications", href: "/applications" },
+    { count: counts.guests, label: "Guests", href: "/guests" },
+    { count: counts.sponsors, label: "Sponsors", href: "/sponsors" },
+    { count: counts.accommodations, label: "Accommodation", href: "/accommodations" }
+  ]) }}
 
-  <h2 class="govuk-heading-m govuk-!-margin-top-6">Incoming data</h2>
+  <h2 class="govuk-heading-m">Incoming data</h2>
 
   <form method="post" action="/ingest/next">
     {% if ingest.next %}

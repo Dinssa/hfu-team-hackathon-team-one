@@ -17,7 +17,7 @@
             <th scope="col" class="govuk-table__header">Lead applicant</th>
             <th scope="col" class="govuk-table__header">UAN</th>
             <th scope="col" class="govuk-table__header">Sponsor</th>
-            <th scope="col" class="govuk-table__header">Council</th>
+            <th scope="col" class="govuk-table__header">Local authority</th>
             <th scope="col" class="govuk-table__header govuk-table__header--numeric">People</th>
             <th scope="col" class="govuk-table__header">Visa status</th>
           </tr>
@@ -28,9 +28,9 @@
               <td class="govuk-table__cell">
                 <a class="govuk-link" href="/applications/{{ a.id }}">{{ a.given_name }} {{ a.family_name }}</a>
               </td>
-              <td class="govuk-table__cell" style="white-space: nowrap;">{{ a.uan or "Not given" }}</td>
+              <td class="govuk-table__cell app-nowrap">{{ a.uan or "Not given" }}</td>
               <td class="govuk-table__cell">{{ a.sponsor_given_name }} {{ a.sponsor_family_name }}</td>
-              <td class="govuk-table__cell">{{ a.council or "No council" }}</td>
+              <td class="govuk-table__cell">{{ a.council or "No local authority" }}</td>
               <td class="govuk-table__cell govuk-table__cell--numeric">{{ a.people }}</td>
               <td class="govuk-table__cell">{{ statusTag(a.visa_status) }}</td>
             </tr>

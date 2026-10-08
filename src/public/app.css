@@ -1,8 +1,10 @@
-/* Service-specific overrides on top of GOV.UK Frontend and MOJ Frontend. */
+/* Haven: service overrides on top of GOV.UK Frontend and MOJ Frontend.
+   Prefix every class with app- so nothing collides with either library. */
 
-/* Wider page: GOV.UK defaults to 960px. Casework tables need the room.
-   GOV.UK centres the container with auto margins from 1020px, which assumes
-   a 960px width. Keep 30px gutters until the wider container fits. */
+/* ------------------------------------------------------------ page width
+   GOV.UK defaults to 960px. Casework tables need the room. GOV.UK centres
+   the container with auto margins from 1020px, which assumes 960px, so keep
+   30px gutters until the wider container fits. */
 @media (min-width: 40.0625em) {
   .govuk-width-container {
     max-width: 1280px;
@@ -18,10 +20,155 @@
   }
 }
 
-/* Side navigation on detail pages: stays in view while the sections scroll. */
+/* ------------------------------------------------------- side navigation
+   In-page contents for detail pages. Follows the GOV.UK "related content"
+   aside: blue rule on top, small bold heading, then the MOJ list. Top of the
+   rule lines up with the top of the first section heading. */
+.app-side-navigation {
+  border-top: 2px solid #1d70b8;
+  padding-top: 10px;
+  margin-bottom: 30px;
+}
+
+.app-side-navigation__title {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.app-side-navigation .moj-side-navigation {
+  padding-top: 0;
+}
+
 @media (min-width: 48.0625em) {
   .app-side-navigation {
     position: sticky;
     top: 20px;
   }
+}
+
+/* ------------------------------------------------------------ stat tiles
+   Counts on the home page. Each tile is one link: number then label. */
+.app-stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 0;
+  margin: 0 0 40px;
+  list-style: none;
+}
+
+.app-stat-tile {
+  margin: 0;
+  border-top: 2px solid #1d70b8;
+  padding-top: 10px;
+}
+
+.app-stat-tile__link {
+  display: inline-block;
+}
+
+.app-stat-tile__count {
+  display: block;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.app-stat-tile__label {
+  display: block;
+  margin-top: 5px;
+}
+
+/* -------------------------------------------------------- autocomplete
+   accessible-autocomplete enhances selects inside filter panels. GOV.UK
+   Frontend only sets fonts on govuk- classes, so give the widget the GOV.UK
+   font and input sizing. The library draws its arrow at z-index -1, which
+   hides it behind the filter panel; isolate the wrapper so -1 stays local. */
+.autocomplete__wrapper {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 20px;
+  font-family: "GDS Transport", arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.autocomplete__input,
+.autocomplete__option,
+.autocomplete__hint {
+  font-family: inherit;
+  font-size: 1.1875rem;
+  line-height: 1.3157894737;
+}
+
+.autocomplete__input,
+.autocomplete__hint {
+  height: 2.5rem;
+  padding: 5px 40px 5px 5px;
+  border: 2px solid #0b0c0c;
+  border-radius: 0;
+}
+
+.autocomplete__input {
+  background-color: transparent;
+}
+
+.autocomplete__hint {
+  color: #505a5f;
+}
+
+.autocomplete__input:focus {
+  outline: 3px solid #fd0;
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 2px;
+}
+
+.autocomplete__dropdown-arrow-down {
+  top: 8px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  color: #0b0c0c;
+}
+
+.autocomplete__input::placeholder {
+  color: #505a5f;
+  opacity: 1;
+}
+
+.autocomplete__menu {
+  z-index: 200;
+  border: 2px solid #0b0c0c;
+  border-top: 0;
+}
+
+.autocomplete__option {
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.autocomplete__option--focused,
+.autocomplete__option:hover {
+  background-color: #1d70b8;
+  border-color: #1d70b8;
+  color: #ffffff;
+}
+
+/* ---------------------------------------------------------- filter panel
+   MOJ lets the filter grow to 385px, which squeezes six-column tables at
+   laptop widths. Hold it at 300px and give the rest to the list. */
+@media (min-width: 48.0625em) {
+  .moj-filter-layout__filter {
+    max-width: 300px;
+    margin-right: 30px;
+  }
+}
+
+/* ------------------------------------------------------------- tables */
+.app-nowrap {
+  white-space: nowrap;
+}
+
+.app-pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

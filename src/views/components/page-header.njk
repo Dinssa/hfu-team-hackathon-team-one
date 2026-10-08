@@ -1,0 +1,14 @@
+{#
+  Standard record page header: caption, h1, optional status line.
+  Usage:
+    {{ pageHeader({ caption: "Visa application", title: "Kateryna Melnyk", statusLabel: "Visa status", status: "Pending" }) }}
+#}
+{% from "components/status-tag.njk" import statusTag %}
+
+{% macro pageHeader(params) %}
+  {% if params.caption %}<span class="govuk-caption-xl">{{ params.caption }}</span>{% endif %}
+  <h1 class="govuk-heading-xl {{ 'govuk-!-margin-bottom-4' if params.status else '' }}">{{ params.title }}</h1>
+  {% if params.status %}
+    <p class="govuk-body govuk-!-margin-bottom-7">{{ params.statusLabel or "Status" }}: {{ statusTag(params.status) }}</p>
+  {% endif %}
+{% endmacro %}

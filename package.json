@@ -18,6 +18,7 @@
   "dependencies": {
     "@duckdb/node-api": "^1.5.6-r.1",
     "@ministryofjustice/frontend": "^11.1.0",
+    "accessible-autocomplete": "^3.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "govuk-frontend": "^6.5.1",

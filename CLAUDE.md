@@ -21,9 +21,11 @@ Read fully before writing code. The full brief is in the sibling repo `../hfu-ha
 | Runtime | Node 24, ES modules |
 | Web | Express 5, `src/app.js` |
 | Templates | Nunjucks + official `govuk-frontend` macros + `@ministryofjustice/frontend` (MOJ) macros. Search path: `src/views`, `node_modules/govuk-frontend/dist`, `node_modules/@ministryofjustice/frontend`, so `govuk/components/x/macro.njk` and `moj/components/x/macro.njk` both resolve |
-| List pages | MOJ filter panel via `{% call filterLayout({...}) %}` from `components/filter-panel.njk`. Routes build `filters` and `selectedFilters` with helpers in `src/lib/filters.js` |
-| Detail pages | MOJ side navigation (`mojSideNavigation`) in a one-quarter column linking to section ids, content in three-quarters, GOV.UK summary cards per section |
-| Footer | `govukFooter` macro in `layout.njk`, with OGL licence and crown |
+| List pages | MOJ filter panel via `{% call filterLayout({...}) %}` from `components/filter-panel.njk`. Controls: `text`, `checkboxes`, `select` (native GOV.UK select; add `autocomplete: true` only for long lists, which enhances it with accessible-autocomplete). Routes build `filters` and `selectedFilters` with helpers in `src/lib/filters.js` |
+| Detail pages | `pageHeader({ caption, title, statusLabel, status })` from `components/page-header.njk`, then a grid: `sideNavigation({ title, label, items })` from `components/side-navigation.njk` in one-quarter, sections in three-quarters. Each section is an `h2` with an id; summary cards inside use `headingLevel: 3` |
+| Landing counts | `statTiles([{ count, label, href }])` from `components/stat-tiles.njk` |
+| Footer | `govukFooter` macro in `layout.njk` with Help, Cookies, Accessibility statement, Privacy pages from `src/routes/pages.js` |
+| Styling | `src/public/app.css` for service overrides, every class prefixed `app-`. `src/public/app.js` for autocomplete enhancement and side navigation scroll tracking. No inline styles in templates |
 | Data | DuckDB file `data/share.duckdb` via `@duckdb/node-api`. Helpers in `src/db.js`: `run`, `all`, `one`, `ensureSchema` |
 | Schema | `src/schema.sql`, idempotent, two schemas: `raw` (files as received) and `serve` (what the app reads) |
 | Ingest | Automatic: the running app processes every pending file on start and whenever a file lands in a handled feed folder (`src/ingest/watch.js`, an in-process `fs.watch` background worker). Order is feed folder (`HANDLERS` in `src/ingest/index.js`), then name. All ingests queue through one lock because the app shares a single DuckDB connection. `npm run ingest` processes everything pending while the app is stopped; the home page button processes one file. `SHARE_INCOMING=/some/dir` points at a different incoming folder |
@@ -46,6 +48,10 @@ Commands: `npm run dev` (watch mode on http://localhost:3000), `npm run ingest`,
 - Visa status: Issued or GRANT with arrival datetime = Arrived; without = Issued; Withdrawn; Refused; Voided = Confirmed; never updated = Pending. Precedence on conflict: Arrived > Issued > Withdrawn > Refused > Confirmed.
 - Case = applications sharing sponsor and accommodation address. Council comes from the accommodation.
 - Any guest under 18 on a case means check 3 needs an Enhanced DBS.
+
+## Wording
+
+- Say "local authority" to users, never "council". The data and code use `council` as the field name; only the words on screen change.
 
 ## Status wording (one tag per status, words never colour alone)
 

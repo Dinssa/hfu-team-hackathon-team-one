@@ -38,6 +38,7 @@ app.use('/assets', express.static(path.join(govukDist, 'govuk', 'assets')))
 app.use('/assets', express.static(path.join(mojDist, 'moj', 'assets')))
 app.use('/govuk', express.static(path.join(govukDist, 'govuk')))
 app.use('/moj', express.static(path.join(mojDist, 'moj')))
+app.use('/autocomplete', express.static(path.join(root, 'node_modules', 'accessible-autocomplete', 'dist')))
 app.use('/public', express.static(path.join(here, 'public')))
 
 app.use(express.urlencoded({ extended: false }))
