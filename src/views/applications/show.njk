@@ -45,6 +45,7 @@
           { key: { text: "GWF" }, value: { text: application.gwf or "Not given" } },
           { key: { text: "Submitted" }, value: { text: application.event_datetime | date } },
           { key: { text: "People on application" }, value: { text: guests.length } },
+          { key: { text: "Case" }, value: { html: ('<a class="govuk-link" href="/cases/' + application.case_id + '">Case ' + application.case_id + '</a>') if application.case_id else "Not yet formed" } },
           { key: { text: "Source file" }, value: { text: application.source_file } }
         ]
       }) }}

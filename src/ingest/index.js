@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { all, ensureSchema } from '../db.js'
 import { ingestApplicationsFile } from './applications.js'
+import { formCases } from '../cases/form.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 export const INCOMING_DIR = process.env.SHARE_INCOMING ?? path.join(here, '..', '..', 'data', 'incoming')
@@ -79,7 +80,8 @@ async function ingestOne (fileName) {
     throw new Error(`${fileName}: this file type is not supported yet. Build the milestone that ingests it first.`)
   }
   const summary = await entry.handler(path.join(INCOMING_DIR, fileName), fileName)
-  const message = `${fileName}: ${summary.rows} rows read, ${summary.created} created, ${summary.skipped} already present, ${summary.rejected} rejected.`
+  summary.cases = await formCases()
+  const message = `${fileName}: ${summary.rows} rows read, ${summary.created} created, ${summary.skipped} already present, ${summary.rejected} rejected, ${summary.cases} added to cases.`
   return { fileName, type: entry.type, summary, message }
 }
 

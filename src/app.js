@@ -12,6 +12,8 @@ import pageRoutes from './routes/pages.js'
 import guestRoutes from './routes/guests.js'
 import sponsorRoutes from './routes/sponsors.js'
 import accommodationRoutes from './routes/accommodations.js'
+import caseRoutes from './routes/cases.js'
+import { formCases } from './cases/form.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
@@ -66,6 +68,7 @@ app.use('/', pageRoutes)
 app.use('/', guestRoutes)
 app.use('/', sponsorRoutes)
 app.use('/', accommodationRoutes)
+app.use('/', caseRoutes)
 
 app.use((req, res) => {
   res.status(404).render('error.njk', { pageTitle: 'Page not found', message: 'If you typed the web address, check it is correct.' })
@@ -89,4 +92,5 @@ function formatDate (value, style) {
 const port = process.env.PORT ?? 3000
 await ensureSchema()
 await watchIncoming()
+await formCases()
 app.listen(port, () => console.log(`Share rebuild listening on http://localhost:${port}`))

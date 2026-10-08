@@ -36,6 +36,6 @@ Node 24, Express 5, Nunjucks with the official GOV.UK Frontend macros, DuckDB as
 | M0 Setup | done |
 | M1 Applications arrive | done |
 | M2 People and places | done |
-| M3 Build the case | |
+| M3 Build the case | done |
 | M4 Safeguarding checks | |
 | M5 Guests move | |

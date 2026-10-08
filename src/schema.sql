@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS serve.cases (
   id               INTEGER PRIMARY KEY DEFAULT nextval('serve.seq_cases'),
   dedupe_key       VARCHAR UNIQUE NOT NULL, -- sponsor_id|accommodation_id
   sponsor_id       INTEGER NOT NULL,
-  accommodation_id INTEGER NOT NULL,
+  accommodation_id INTEGER,                -- null until an address is known
   council          VARCHAR,
   title            VARCHAR NOT NULL,
   checks_status    VARCHAR NOT NULL DEFAULT 'Checks Required',
@@ -146,3 +146,6 @@ CREATE TABLE IF NOT EXISTS serve.case_events (
   kind         VARCHAR NOT NULL,
   description  VARCHAR NOT NULL
 );
+
+-- Migrations for databases created before a column changed. Safe to re-run.
+ALTER TABLE serve.cases ALTER COLUMN accommodation_id DROP NOT NULL;

@@ -1,0 +1,44 @@
+{% extends "layout.njk" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "components/status-tag.njk" import statusTag %}
+{% from "components/filter-panel.njk" import filterLayout %}
+
+{% block main_content %}
+  <h1 class="govuk-heading-xl">Cases</h1>
+
+  {% call filterLayout({ action: "/cases", filters: filters, selectedFilters: selectedFilters }) %}
+    {% if cases.length %}
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">
+          {{ cases.length }} case{{ "s" if cases.length != 1 }}{{ " matching your filters" if filtered }}
+        </caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Case</th>
+            <th scope="col" class="govuk-table__header">Sponsor</th>
+            <th scope="col" class="govuk-table__header">Local authority</th>
+            <th scope="col" class="govuk-table__header govuk-table__header--numeric">People</th>
+            <th scope="col" class="govuk-table__header">Checks status</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for c in cases %}
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell"><a class="govuk-link" href="/cases/{{ c.id }}">{{ c.title }}</a></td>
+              <td class="govuk-table__cell">
+                {% if c.sponsor_id %}<a class="govuk-link" href="/sponsors/{{ c.sponsor_id }}">{{ c.sponsor_given_name }} {{ c.sponsor_family_name }}</a>{% else %}Not given{% endif %}
+              </td>
+              <td class="govuk-table__cell">{{ c.council or "No local authority" }}</td>
+              <td class="govuk-table__cell govuk-table__cell--numeric">{{ c.people }}</td>
+              <td class="govuk-table__cell">{{ statusTag(c.checks_status) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif filtered %}
+      {{ govukInsetText({ html: 'No cases match these filters. <a class="govuk-link" href="/cases">Clear filters</a>.' }) }}
+    {% else %}
+      {{ govukInsetText({ html: 'No cases yet. Cases form automatically when applications are processed. <a class="govuk-link" href="/">Process the next data file</a>.' }) }}
+    {% endif %}
+  {% endcall %}
+{% endblock %}
